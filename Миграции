@@ -1,0 +1,3 @@
+dotnet ef migrations add InitialCreate --project MusicCollection.Infrastructure.Persistence --startup-project MusicCollection.Infrastructure.Persistence
+
+dotnet ef database update --project MusicCollection.Infrastructure.Persistence --startup-project MusicCollection.Infrastructure.Persistence

@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Элементы решения/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Project Path="MusicCollection.Application/MusicCollection.Application.csproj" Id="9bd982a1-ae1f-46c3-b807-a2d128f24b2e" />
+  <Project Path="MusicCollection.AvaloniaUI/MusicCollection.AvaloniaUI.csproj" Id="a47a24d8-795d-481a-9173-c181967b9fde" />
+  <Project Path="MusicCollection.Domain/MusicCollection.Domain.csproj" Id="5ca506c9-7e3f-4f0d-b8db-2a0bd4562deb" />
+  <Project Path="MusicCollection.Infrastructure.Persistence/MusicCollection.Infrastructure.Persistence.csproj" Id="a88b637e-eb85-4c5a-8d24-16279fc3dcd5" />
+  <Project Path="MusicCollection.TestConsole/MusicCollection.TestConsole.csproj" Id="e923ee13-f7cb-4783-afd6-744fe5fb4202" />
+</Solution>

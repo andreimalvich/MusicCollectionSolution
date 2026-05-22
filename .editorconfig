@@ -1,0 +1,71 @@
+# root = true означает, что это главный конфигурационный файл для всего решения
+root = true
+
+[*.cs]
+# ==========================================
+# 1. ОБЩИЕ НАСТРОЙКИ ФОРМАТИРОВАНИЯ И ОТСТУПОВ
+# ==========================================
+indent_style = space
+indent_size = 4
+tab_width = 4
+end_of_line = crlf
+trim_trailing_whitespace = true
+insert_final_newline = true
+charset = utf-8-bom
+
+# ==========================================
+# 2. ПОДАВЛЕНИЕ УСТАРЕВШИХ И РАЗДРАЖАЮЩИХ ПРАВИЛ STYLECOP
+# ==========================================
+
+# --- Именование и префиксы ---
+dotnet_diagnostic.SA1309.severity = none      # Отключено: Запрет на подчеркивание `_` в приватных полях (теперь разрешено)
+dotnet_diagnostic.SA1101.severity = none      # Отключено: Требование писать `this.` перед каждым вызовом
+dotnet_diagnostic.SX1101.severity = none      # Отключено: Зеркальные запреты на `this.`
+dotnet_diagnostic.SA1300.severity = none      # Отключено: Запрет на маленькие буквы в именах пространств (нужно для Avalonia/WPF)
+dotnet_diagnostic.SA1011.severity = none      # Отключаем устаревшую проверку пробелов у закрывающей квадратной скобки
+dotnet_diagnostic.SA1010.severity = none      # Отключаем устаревшую проверку пробелов у открывающей квадратной скобки (конфликтует с синтаксисом коллекций)
+dotnet_diagnostic.SA1115.severity = none      # SA1115ParameterMustFollowComma
+dotnet_diagnostic.SA1009.severity = none
+
+# --- Расположение using ---
+dotnet_diagnostic.SA1200.severity = none      # Отключено: Запрет писать using на самом верху файла (вне namespace)
+
+# --- Документация и заголовки (Самый большой источник шума) ---
+dotnet_diagnostic.SA1600.severity = none      # Отключено: Обязательные XML-комментарии для публичных членов
+dotnet_diagnostic.SA1601.severity = none      # Отключено: Обязательные XML-комментарии для partial-классов
+dotnet_diagnostic.SA1602.severity = none      # Отключено: Обязательные XML-комментарии для перечислений (Enum)
+dotnet_diagnostic.SA1633.severity = none      # Отключено: Обязательный заголовок файла с копирайтом (File Header)
+dotnet_diagnostic.SA1652.severity = none      # Отключено: Внутренние проверки XML-валидации документации
+
+# --- Избыточные элементы и скобки ---
+dotnet_diagnostic.SA1124.severity = none      # Отключено: Запрет на использование макросов #region
+dotnet_diagnostic.SA1000.severity = none      # Отключено: Устаревшие правила пробелов около новых ключевых слов C#
+dotnet_diagnostic.SA1111.severity = none      # Отключено: Споры о закрывающих круглых скобках на новой строке
+
+# ==========================================
+# 3. СОВРЕМЕННЫЕ СТАНДАРТЫ .NET (ВМЕСТО УСТАРЕВШЕГО STYLECOP)
+# ==========================================
+
+# Приватные поля ДОЛЖНЫ начинаться с `_` (напр. _artistNameText) — это современный стандарт
+dotnet_naming_rule.private_fields_with_underscore.symbols = private_fields_symbols
+dotnet_naming_rule.private_fields_with_underscore.style = prefix_underscore_style
+dotnet_naming_rule.private_fields_with_underscore.severity = warning
+dotnet_naming_symbols.private_fields_symbols.applicable_kinds = field
+dotnet_naming_symbols.private_fields_symbols.applicable_accessibilities = private
+dotnet_naming_style.prefix_underscore_style.required_prefix = _
+dotnet_naming_style.prefix_underscore_style.capitalization = camel_case
+
+# Использование современных File-Scoped Namespaces (без фигурных скобок)
+csharp_style_namespace_declarations = file_scoped:suggestion
+
+# Директивы using должны быть строго СНАРУЖИ пространства имен
+dotnet_style_using_directive_placement = outside_namespace:suggestion
+
+# ==========================================
+# 4. ПОЛЕЗНЫЕ ПРАВИЛА STYLECOP (ОСТАВЛЕНЫ КАК ПРЕДУПРЕЖДЕНИЯ)
+# ==========================================
+dotnet_diagnostic.SA1201.severity = warning   # Оставлено: Контроль порядка (сначала поля, потом конструкторы, потом методы)
+dotnet_diagnostic.SA1202.severity = warning   # Оставлено: Контроль модификаторов доступа (public выше, чем private)
+dotnet_diagnostic.SA1302.severity = warning   # Оставлено: Интерфейсы должны начинаться с буквы 'I'
+dotnet_diagnostic.SA1516.severity = warning   # Оставлено: Элементы внутри класса должны быть разделены пустой строкой
+

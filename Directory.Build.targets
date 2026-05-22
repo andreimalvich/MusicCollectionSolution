@@ -1,0 +1,6 @@
+<Project>
+  <!-- Автоматически добавляем глобальный stylecop.json во все проекты решения -->
+  <ItemGroup>
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" />
+  </ItemGroup>
+</Project>

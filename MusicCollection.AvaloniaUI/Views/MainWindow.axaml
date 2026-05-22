@@ -1,0 +1,220 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		xmlns:vm="using:MusicCollection.AvaloniaUI.ViewModels"
+		xmlns:artists="using:MusicCollection.Application.Artists.Queries.GetArtistsList"
+		xmlns:carousel="using:MusicCollection.Application.Albums.Queries.GetAlbumsCarousel"
+		xmlns:dtos="using:MusicCollection.Application.Albums.Queries.GetAlbumDetails"
+		xmlns:converters="using:MusicCollection.AvaloniaUI.Converters"
+		x:Class="MusicCollection.AvaloniaUI.Views.MainWindow"
+		x:DataType="vm:MainWindowViewModel"
+		x:CompileBindings="True"
+		Title="Music Collection - Мои Компакт-Диски"
+		Icon="/Assets/avalonia-logo.ico"
+		Width="1150" Height="720"
+		WindowStartupLocation="CenterScreen">
+
+	<Window.Resources>
+		<converters:ByteArrayToBitmapConverter x:Key="BytesToBitmapConverter"/>
+	</Window.Resources>
+
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+		to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<vm:MainWindowViewModel/>
+	</Design.DataContext>
+
+	<!-- Главная сетка: разделяет экран на левую панель артистов и правую рабочую область -->
+	<Grid ColumnDefinitions="280, *">
+
+		<!-- ========================================================== -->
+		<!-- ЛЕВАЯ ПАНЕЛЬ: Список артистов и кнопка удаления            -->
+		<!-- ========================================================== -->
+		<Border Grid.Column="0" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0">
+			<!-- Меняем RowDefinitions, добавляя третью строчку Auto под кнопку -->
+			<Grid RowDefinitions="Auto, *, Auto">
+
+				<Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="15,15,15,5">
+					<TextBlock Grid.Column="0" Text="Исполнители" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+					<Button Grid.Column="1"
+							Content="+"
+							Command="{Binding OpenAddAlbumWindowCommand}"
+							ToolTip.Tip="Добавить новый альбом в коллекцию"
+							Background="#1976D2" Foreground="White"
+							FontWeight="Bold" CornerRadius="4" Padding="10,4"/>
+				</Grid>
+
+
+
+				<!-- Список артистов (занимает центральную часть) -->
+				<ListBox Grid.Row="1"
+						 ItemsSource="{Binding Artists}"
+						 SelectedItem="{Binding SelectedArtist}"
+						 Background="Transparent" Margin="5">
+					<ListBox.ItemTemplate>
+						<DataTemplate x:DataType="artists:ArtistLookupDto">
+							<TextBlock Text="{Binding Name}" FontSize="14" Padding="5,2"/>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+
+				<!-- КНОПКА УДАЛЕНИЯ АРТИСТА (Прижимается к самому низу панели) -->
+				<Button Grid.Row="2"
+						Content="Удалить исполнителя"
+						Command="{Binding DeleteArtistCommand}"
+						Background="#EF5350" Foreground="White"
+						FontWeight="Medium" FontSize="12"
+						HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+						Padding="10,8" Margin="10,5,10,10" CornerRadius="4">
+					<Button.Styles>
+						<Style Selector="Button:pointerover /template/ ContentPresenter">
+							<Setter Property="Background" Value="#D32F2F"/>
+							<Setter Property="Foreground" Value="White"/>
+						</Style>
+					</Button.Styles>
+				</Button>
+			</Grid>
+		</Border>
+
+		<!-- ========================================================== -->
+		<!-- ПРАВАЯ ПАНЕЛЬ: Карусель, Инфо и Треки                      -->
+		<!-- ========================================================== -->
+		<Grid Grid.Column="1" RowDefinitions="*, Auto, 1.5*">
+
+			<!-- 1. ВЕРХНЯЯ ЧАСТЬ: Карусель альбомов -->
+			<Border Grid.Row="0" Background="#FAFAFA" Padding="15,10,15,10">
+				<Grid RowDefinitions="Auto, *">
+					<TextBlock Grid.Row="0" Text="Альбомы коллекции" FontSize="14" FontWeight="SemiBold" Margin="5,0,0,10"/>
+
+					<!-- Горизонтальная лента альбомов (Имитация карусели) -->
+					<ListBox Grid.Row="1"
+							 ItemsSource="{Binding CarouselAlbums}"
+							 SelectedItem="{Binding SelectedAlbum}"
+							 Background="Transparent">
+						<ListBox.ItemsPanel>
+							<ItemsPanelTemplate>
+								<StackPanel Orientation="Horizontal" Spacing="18"/>
+							</ItemsPanelTemplate>
+						</ListBox.ItemsPanel>
+
+						<!-- Шаблон карточки: Обложка + Название + Год -->
+						<ListBox.ItemTemplate>
+							<DataTemplate x:DataType="carousel:AlbumCarouselItemDto">
+								<StackPanel Width="130" Spacing="5">
+
+									<Border Width="120" Height="120" Background="#E0E0E0" CornerRadius="4" ClipToBounds="True" BoxShadow="0 2 5 0 #15000000">
+										<!-- Привязываем свойство Source к CoverImageData и пропускаем через конвертер -->
+										<Image Source="{Binding CoverImageData, Converter={StaticResource BytesToBitmapConverter}}"
+											   Stretch="UniformToFill"
+											   HorizontalAlignment="Center"
+											   VerticalAlignment="Center"/>
+									</Border>
+
+									<TextBlock Text="{Binding Title}" FontWeight="Medium" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" FontSize="12" HorizontalAlignment="Center"/>
+									<TextBlock Text="{Binding ReleaseYear, StringFormat='({0})'}" FontSize="11" Foreground="#757575" HorizontalAlignment="Center"/>
+								</StackPanel>
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+					</ListBox>
+				</Grid>
+			</Border>
+
+			<!-- Интерактивный разделитель окон (GridSplitter) -->
+			<GridSplitter Grid.Row="1" Height="3" Background="#E0E0E0" ResizeBehavior="PreviousAndNext"/>
+
+			<!-- 2. НИЖНЯЯ ЧАСТЬ: Информация об альбоме и Треклист -->
+			<Grid Grid.Row="2" ColumnDefinitions="320, *" Margin="20,15,20,20">
+
+				<!-- Панелька с детальным текстовым описанием релиза -->
+				<StackPanel Grid.Column="0" DataContext="{Binding CurrentAlbumDetails}" x:DataType="dtos:AlbumDetailsDto" Spacing="10" Margin="0,0,20,0">
+					<TextBlock Text="О релизе" FontSize="13" FontWeight="SemiBold" Foreground="#9E9E9E" Margin="0,0,0,2"/>
+					<TextBlock Text="{Binding Title}" FontSize="22" FontWeight="Bold" TextWrapping="Wrap"/>
+					<TextBlock Text="{Binding ArtistName}" FontSize="16" Foreground="#1976D2" FontWeight="Medium"/>
+
+					<Separator Margin="0,5" Background="#E0E0E0"/>
+
+					<TextBlock Text="{Binding Label, StringFormat='Лейбл: {0}'}" FontSize="13" IsVisible="{Binding Label, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+					<TextBlock Text="{Binding CatalogNumber, StringFormat='Каталог #: {0}'}" FontSize="13" IsVisible="{Binding CatalogNumber, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+					<TextBlock Text="{Binding Packaging, StringFormat='Упаковка: {0}'}" FontSize="13"/>
+
+					<Button Content="Пакетная загрузка треков" 
+        Command="{Binding $parent[Window].DataContext.OpenBatchLoadTracksWindowCommand}"
+        Background="#2E7D32" Foreground="White"
+        FontWeight="Medium" FontSize="12"
+        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+        Padding="10,6" Margin="0,10,0,0" CornerRadius="4">
+</Button>
+
+
+					<!-- ========================================================== -->
+					<!-- ИСПРАВЛЕНИЕ / ДОБАВЛЕНИЕ: Кнопка удаления альбома         -->
+					<!-- ========================================================== -->
+					<!-- Так как DataContext этой StackPanel переключен на CurrentAlbumDetails,
+					чтобы достучаться до команды удаления во главной ViewModel,
+					мы используем относительную привязку $parent[Window].DataContext -->
+					<Button Content="Удалить альбом"
+							Command="{Binding $parent[Window].DataContext.DeleteAlbumCommand}"
+							Background="#EF5350" Foreground="White"
+							FontWeight="Medium" FontSize="12"
+							HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+							Padding="10,6" Margin="0,15,0,0" CornerRadius="4">
+						<Button.Styles>
+							<!-- Эстетика: меняем цвет при наведении -->
+							<Style Selector="Button:pointerover /template/ ContentPresenter">
+								<Setter Property="Background" Value="#D32F2F"/>
+								<Setter Property="Foreground" Value="White"/>
+							</Style>
+						</Button.Styles>
+					</Button>
+					<Button Content="Редактировать метаданные"
+							Command="{Binding $parent[Window].DataContext.OpenEditAlbumWindowCommand}"
+							Background="#1976D2" Foreground="White"
+							FontWeight="Medium" FontSize="12"
+							HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+							Padding="10,6" Margin="0,10,0,0" CornerRadius="4">
+					</Button>
+
+				</StackPanel>
+
+				<!-- Область отображения треков со строгой группировкой по дискам -->
+				<Grid Grid.Column="1" RowDefinitions="Auto, *">
+					<TextBlock Grid.Row="0" Text="Треклист издания" FontSize="13" FontWeight="SemiBold" Foreground="#9E9E9E" Margin="0,0,0,8"/>
+
+					<!-- Используем свойство DataTemplates. Дерево само будет сканировать эту коллекцию
+					и выбирать нужный шаблон в зависимости от типа данных (Диск или Трек) -->
+					<TreeView Grid.Row="1" ItemsSource="{Binding CurrentAlbumDetails.Discs}" BorderThickness="0" Background="Transparent">
+						<TreeView.DataTemplates>
+
+							<!-- ШАБЛОН 1: Для физического диска (Узел 1-го уровня) -->
+							<!-- Свойство ItemsSource указывает, что внутри диска лежат элементы типа TrackDetailsDto -->
+							<TreeDataTemplate DataType="dtos:DiscDetailsDto" ItemsSource="{Binding Tracks}">
+								<StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4">
+									<TextBlock Text="💿" FontSize="14" VerticalAlignment="Center"/>
+									<TextBlock Text="{Binding DiscNumber, StringFormat='Диск {0}'}" FontWeight="Bold" VerticalAlignment="Center"/>
+									<TextBlock Text="{Binding DiscName, StringFormat='- {0}'}"
+											   IsVisible="{Binding DiscName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+											   FontStyle="Italic" Foreground="#757575" VerticalAlignment="Center"/>
+								</StackPanel>
+							</TreeDataTemplate>
+
+							<!-- ШАБЛОН 2: Для музыкального трека (Узел 2-го уровня) -->
+							<DataTemplate DataType="dtos:TrackDetailsDto">
+								<Grid ColumnDefinitions="35, 300, Auto" Width="450" Margin="0,3">
+									<!-- Добавили {} в начало StringFormat для экранирования двоеточия -->
+									<TextBlock Grid.Column="0" Text="{Binding Number, StringFormat='{}{0:D2}.'}" Foreground="#9E9E9E"/>
+									<TextBlock Grid.Column="1" Text="{Binding Title}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+									<TextBlock Grid.Column="2" Text="{Binding Duration}" Foreground="#757575" HorizontalAlignment="Right"/>
+								</Grid>
+							</DataTemplate>
+
+						</TreeView.DataTemplates>
+					</TreeView>
+				</Grid>
+
+			</Grid>
+		</Grid>
+	</Grid>
+
+</Window>

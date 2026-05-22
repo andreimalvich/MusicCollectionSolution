@@ -1,0 +1,55 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:vm="using:MusicCollection.AvaloniaUI.ViewModels"
+        xmlns:dtos="using:MusicCollection.Application.Albums.Queries.GetAlbumDetails"
+        x:Class="MusicCollection.AvaloniaUI.Views.BatchLoadTracksWindow"
+        x:DataType="vm:BatchLoadTracksWindowViewModel"
+        x:CompileBindings="True"
+        Title="Пакетная загрузка треклиста" 
+        Width="600" Height="500"
+        WindowStartupLocation="CenterOwner">
+  
+        <Grid RowDefinitions="Auto, Auto, *, Auto" Margin="20">
+        
+        <!-- Шапка -->
+        <StackPanel Grid.Row="0" Spacing="5" Margin="0,0,0,15">
+            <TextBlock Text="{Binding AlbumTitle, StringFormat='Импорт треков для: {0}'}" FontSize="16" FontWeight="Bold" Foreground="#1976D2"/>
+            <TextBlock Text="Вставьте треклист в формате: Название песни - ММ:СС (каждая песня с новой строки)" FontSize="12" Foreground="#757575"/>
+            <TextBlock Text="Пример: 01. Thunderstruck - 04:52" FontSize="11" Foreground="#9E9E9E" FontStyle="Italic"/>
+        </StackPanel>
+
+        <!-- Выбор диска -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
+            <TextBlock Text="Целевой диск:" VerticalAlignment="Center" FontWeight="Medium"/>
+            <ComboBox ItemsSource="{Binding Discs}" SelectedItem="{Binding SelectedDisc}" Width="200">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="dtos:DiscDetailsDto">
+                        <TextBlock Text="{Binding DiscNumber, StringFormat='Диск {0}'}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- Большое текстовое поле ввода -->
+        <TextBox Grid.Row="2" 
+                 Text="{Binding RawTrackListText, Mode=TwoWay}" 
+                 Watermark="Вставьте текст треклиста сюда..." 
+                 AcceptsReturn="True" 
+                 FontFamily="Courier New" FontSize="13"
+                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+
+        <!-- Панель кнопок снизу -->
+        <Border Grid.Row="3" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="0,15,0,0" Margin="0,15,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                <Button Content="Отмена" Click="Cancel_Click" Background="#E0E0E0" Padding="15,8" CornerRadius="4"/>
+                <Button Content="Импортировать пачку" Command="{Binding ImportCommand}" Background="#2E7D32" Foreground="White" FontWeight="Medium" Padding="20,8" CornerRadius="4"/>
+            </StackPanel>
+        </Border>
+        
+    </Grid>
+
+
+</Window>
