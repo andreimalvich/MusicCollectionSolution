@@ -166,20 +166,30 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task OpenAddAlbumWindowAsync()
     {
-        // Запрашиваем экземпляр окна из нашего глобального DI-контейнера App
+
         var window = App.ServiceProvider.GetRequiredService<AddAlbumWindow>();
 
-        // Находим главное окно приложения, чтобы сделать новое окно модальным (блокирующим задний фон)
         if (App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
         {
             var result = await window.ShowDialog<bool>(desktop.MainWindow);
 
-            // Если окно вернуло true (сохранение прошло успешно) — плавно обновляем карусель альбомов!
+            // Если окно вернуло true (альбом и новый артист успешно сохранены)
             if (result)
             {
+                // 1. ПОЧИНКА: Полностью перечитываем список артистов из MS SQL Server
+                Artists.Clear();
+                var refreshedArtists = await _artistsQuery.ExecuteAsync();
+                foreach (var artist in refreshedArtists)
+                {
+                    Artists.Add(artist);
+                }
+
+                // 2. Обновляем карусель альбомов, как и раньше
                 await LoadCarouselAsync();
             }
         }
+
+
     }
 
 

@@ -2,10 +2,12 @@
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using MusicCollection.Application.Albums.Commands.CreateAlbum;
 using MusicCollection.Application.Albums.Commands.UpdateAlbum;
 using MusicCollection.Application.Albums.Queries.GetAlbumDetails;
 using MusicCollection.Application.Artists.Queries.GetArtistsList;
+using MusicCollection.Application.Common.Interfaces;
 using MusicCollection.Domain.Entities;
 using System;
 using System.Collections.ObjectModel;
@@ -25,6 +27,11 @@ public partial class AddAlbumWindowViewModel : ViewModelBase
 
     // Храним ID редактируемого альбома (0, если это создание)
     private readonly int _editingAlbumId;
+
+    [ObservableProperty]
+    public partial string? ArtistSearchText { get; set; }
+
+
 
     public AddAlbumWindowViewModel(
         IGetArtistsListQuery artistsQuery,
@@ -82,71 +89,36 @@ public partial class AddAlbumWindowViewModel : ViewModelBase
         }
     }
 
-
-    //[RelayCommand]
-    //private async Task SaveAsync()
-    //{
-    //    if (SelectedArtist == null || string.IsNullOrWhiteSpace(Title)) return;
-
-    //    try
-    //    {
-    //        if (_editingAlbumId > 0)
-    //        {
-    //            // РЕЖИМ РЕДАКТИРОВАНИЯ: вызываем Update команду
-    //            var updateCommand = new UpdateAlbumCommand(
-    //                Id: _editingAlbumId,
-    //                Title: Title,
-    //                ReleaseYear: ReleaseYear,
-    //                CatalogNumber: CatalogNumber,
-    //                Label: Label,
-    //                Packaging: SelectedFormat
-    //            );
-
-    //            await _updateAlbumService.ExecuteAsync(updateCommand);
-    //        }
-    //        else
-    //        {
-    //            // РЕЖИМ СОЗДАНИЯ: вызываем Create команду
-    //            var createCommand = new CreateAlbumCommand(
-    //                Title: Title,
-    //                ReleaseYear: ReleaseYear,
-    //                CatalogNumber: CatalogNumber,
-    //                Label: Label,
-    //                Packaging: SelectedFormat,
-    //                ArtistId: SelectedArtist.Id,
-    //                CoverImage: CoverImageBytes,
-    //                Discs: Discs.Select(d => new CreateDiscDto(
-    //                    d.DiscNumber,
-    //                    d.DiscName,
-    //                    d.Tracks.Select(t => new CreateTrackDto(t.Number, t.Title, TimeSpan.TryParse($"00:{t.DurationStr}", out var ts) ? ts : TimeSpan.Zero)).ToList()
-    //                )).ToList()
-    //            );
-
-    //            await _createAlbumService.ExecuteAsync(createCommand);
-    //        }
-
-    //        RequestClose?.Invoke();
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        System.Diagnostics.Debug.WriteLine($"Ошибка сохранения: {ex.Message}");
-    //    }
-    //}
-
-    // Внутри AddAlbumWindowViewModel.cs
-
-    // ОСТАВЛЯЕМ ТОЛЬКО ОДИН ЭТОТ МЕТОД СОХРАНЕНИЯ:
     [RelayCommand]
     private async Task SaveAsync()
     {
-        // Проверяем, выбраны ли обязательные поля формы
-        if (SelectedArtist == null || string.IsNullOrWhiteSpace(Title)) return;
+        // Проверяем: либо выбран артист из списка, либо вбит текст руками
+        string? artistName = SelectedArtist?.Name ?? ArtistSearchText;
+
+        if (string.IsNullOrWhiteSpace(Title) || string.IsNullOrWhiteSpace(artistName)) return;
 
         try
         {
+            int finalArtistId = SelectedArtist?.Id ?? 0;
+
+            // Если финальный ID равен 0, значит это новый артист!
+            // Нам нужно сначала создать его в базе данных, чтобы получить рабочий ArtistId
+            if (finalArtistId == 0)
+            {
+                // Для этого временно запрашиваем контекст из DI
+                using var scope = App.ServiceProvider.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+
+                var newArtist = new MusicCollection.Domain.Entities.Artist { Name = artistName.Trim() };
+                context.Artists.Add(newArtist);
+                await context.SaveChangesAsync();
+
+                finalArtistId = newArtist.Id; // Получаем сгенерированный базой ID
+            }
+
             if (_editingAlbumId > 0)
             {
-                // РЕЖИМ РЕДАКТИРОВАНИЯ: вызываем Update команду
+                // Режим редактирования
                 var updateCommand = new UpdateAlbumCommand(
                     Id: _editingAlbumId,
                     Title: Title,
@@ -155,35 +127,28 @@ public partial class AddAlbumWindowViewModel : ViewModelBase
                     Label: Label,
                     Packaging: SelectedFormat
                 );
-
                 await _updateService.ExecuteAsync(updateCommand);
             }
             else
             {
-                // РЕЖИМ СОЗДАНИЯ: вызываем Create команду
+                // Режим создания (передаем finalArtistId)
                 var createCommand = new CreateAlbumCommand(
                     Title: Title,
                     ReleaseYear: ReleaseYear,
                     CatalogNumber: CatalogNumber,
                     Label: Label,
                     Packaging: SelectedFormat,
-                    ArtistId: SelectedArtist.Id,
+                    ArtistId: finalArtistId, // Используем проверенный ID
                     CoverImage: CoverImageBytes,
                     Discs: Discs.Select(d => new CreateDiscDto(
                         d.DiscNumber,
                         d.DiscName,
-                        d.Tracks.Select(t => new CreateTrackDto(
-                            t.Number,
-                            t.Title,
-                            TimeSpan.TryParse($"00:{t.DurationStr}", out var ts) ? ts : TimeSpan.Zero
-                        )).ToList()
+                        d.Tracks.Select(t => new CreateTrackDto(t.Number, t.Title, TimeSpan.TryParse($"00:{t.DurationStr}", out var ts) ? ts : TimeSpan.Zero)).ToList()
                     )).ToList()
                 );
-
                 await _createAlbumService.ExecuteAsync(createCommand);
             }
 
-            // Если всё сохранилось успешно — закрываем диалоговое окно
             RequestClose?.Invoke();
         }
         catch (Exception ex)
@@ -195,8 +160,9 @@ public partial class AddAlbumWindowViewModel : ViewModelBase
 
 
 
-    
-    
+
+
+
 
     // Событие для закрытия окна из кода после успешного сохранения
     public event Action? RequestClose;

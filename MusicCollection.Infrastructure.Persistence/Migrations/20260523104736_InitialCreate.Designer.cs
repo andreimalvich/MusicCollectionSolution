@@ -12,7 +12,7 @@ using MusicCollection.Infrastructure.Persistence.Contexts;
 namespace MusicCollection.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MusicDbContext))]
-    [Migration("20260522111721_InitialCreate")]
+    [Migration("20260523104736_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

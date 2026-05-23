@@ -19,7 +19,7 @@ public class PhysicalDiscConfiguration : IEntityTypeConfiguration<PhysicalDisc>
         builder.Property(d => d.DiscName)
             .HasMaxLength(200);
 
-        // 4. Настройка отношений
+        // Настройка отношений
         // Многие-к-одному: диск принадлежит конкретному альбому
         builder.HasOne(d => d.Album)
             .WithMany(a => a.PhysicalDiscs)

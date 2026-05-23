@@ -26,79 +26,80 @@
 				<TextBlock Text="Метаданные альбома" FontSize="16" FontWeight="Bold" Foreground="#1976D2"/>
 
 				<!-- Сетка основных полей альбома -->
-<Grid ColumnDefinitions="*, *, 150" RowDefinitions="Auto, Auto, Auto" HorizontalAlignment="Stretch">
-    <!-- 1-й ряд (Исполнитель и Название) -->
-    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,10">
-        <TextBlock Text="Исполнитель *" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
-        <ComboBox ItemsSource="{Binding Artists}" SelectedItem="{Binding SelectedArtist}" HorizontalAlignment="Stretch">
-            <ComboBox.ItemTemplate>
-                <DataTemplate x:DataType="artists:ArtistLookupDto">
-                    <TextBlock Text="{Binding Name}"/>
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
-    </StackPanel>
-    
-    <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,10,10">
-        <TextBlock Text="Название альбома *" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
-        <TextBox Text="{Binding Title, Mode=TwoWay}" Watermark="Введите название..."/>
-    </StackPanel>
+				<Grid ColumnDefinitions="*, *, 150" RowDefinitions="Auto, Auto, Auto" HorizontalAlignment="Stretch">
+					<!-- 1-й ряд (Исполнитель и Название) -->
+					<StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,10">
+						<TextBlock Text="Исполнитель *" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
+						<ComboBox ItemsSource="{Binding Artists}"
+								  SelectedItem="{Binding SelectedArtist}"
+								  Text="{Binding ArtistSearchText, Mode=TwoWay}"
+								  IsEditable="True"
+								  IsTextSearchEnabled="True"
+								  DisplayMemberBinding="{Binding Name, DataType=artists:ArtistLookupDto}"								  
+							      HorizontalAlignment="Stretch">							
+						</ComboBox>
+					</StackPanel>
 
-    <!-- 2-й ряд (Год и Упаковка) -->
-    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,10">
-        <TextBlock Text="Год выпуска *" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
-        <NumericUpDown Value="{Binding ReleaseYear, Mode=TwoWay}" Minimum="1982" Maximum="2100" FormatString="0"/>
-    </StackPanel>
-    
-    <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,10,10">
-        <TextBlock Text="Тип упаковки" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
-        <ComboBox ItemsSource="{Binding Formats}" SelectedItem="{Binding SelectedFormat}" HorizontalAlignment="Stretch"/>
-    </StackPanel>
+					<StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,10,10">
+						<TextBlock Text="Название альбома *" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
+						<TextBox Text="{Binding Title, Mode=TwoWay}" Watermark="Введите название..."/>
+					</StackPanel>
 
-    <!-- 3-й ряд (Лейбл и Каталог) -->
-    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,10,10">
-        <TextBlock Text="Рекорд-лейбл" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
-        <TextBox Text="{Binding Label, Mode=TwoWay}" Watermark="Например: Sony Music"/>
-    </StackPanel>
-    
-    <StackPanel Grid.Row="2" Grid.Column="1" Margin="10,0,10,10">
-        <TextBlock Text="Каталожный номер" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
-        <TextBox Text="{Binding CatalogNumber, Mode=TwoWay}" Watermark="Например: CD-74321"/>
-    </StackPanel>
+					<!-- 2-й ряд (Год и Упаковка) -->
+					<StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,10">
+						<TextBlock Text="Год выпуска *" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
+						<NumericUpDown Value="{Binding ReleaseYear, Mode=TwoWay}" Minimum="1982" Maximum="2100" FormatString="0"/>
+					</StackPanel>
 
-    <!-- ПРАВАЯ КОЛОНКА (Занимает все 3 ряда по вертикали!) -->
-    <!-- Сюда мы помещаем блок обложки -->
-    <StackPanel Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="10,15,0,0" Spacing="8">
-        <TextBlock Text="Обложка диска" FontSize="12" Foreground="#757575" HorizontalAlignment="Center"/>
-        
-        <!-- Квадратная область для превью обложки -->
-        <Button Command="{Binding SelectCoverImageCommand}"
-                CommandParameter="{Binding $parent[Window]}"
-                Width="120" Height="120" Padding="0"
-                Background="#E0E0E0" CornerRadius="4" ClipToBounds="True">
-            
-            <!-- Показываем картинку, пропущенную через наш конвертер байт -->
-            <Image Source="{Binding CoverImageBytes, Converter={StaticResource BytesToBitmapConverter}}"
-                   Stretch="UniformToFill"
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Center"/>
-        </Button>
-        
-        <TextBlock Text="Нажмите для выбора" FontSize="10" Foreground="#9E9E9E" HorizontalAlignment="Center"/>
-    </StackPanel>
-</Grid>
+					<StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,10,10">
+						<TextBlock Text="Тип упаковки" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
+						<ComboBox ItemsSource="{Binding Formats}" SelectedItem="{Binding SelectedFormat}" HorizontalAlignment="Stretch"/>
+					</StackPanel>
+
+					<!-- 3-й ряд (Лейбл и Каталог) -->
+					<StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,10,10">
+						<TextBlock Text="Рекорд-лейбл" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
+						<TextBox Text="{Binding Label, Mode=TwoWay}" Watermark="Например: Sony Music"/>
+					</StackPanel>
+
+					<StackPanel Grid.Row="2" Grid.Column="1" Margin="10,0,10,10">
+						<TextBlock Text="Каталожный номер" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
+						<TextBox Text="{Binding CatalogNumber, Mode=TwoWay}" Watermark="Например: CD-74321"/>
+					</StackPanel>
+
+					<!-- ПРАВАЯ КОЛОНКА (Занимает все 3 ряда по вертикали!) -->
+					<!-- Сюда мы помещаем блок обложки -->
+					<StackPanel Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="10,15,0,0" Spacing="8">
+						<TextBlock Text="Обложка диска" FontSize="12" Foreground="#757575" HorizontalAlignment="Center"/>
+
+						<!-- Квадратная область для превью обложки -->
+						<Button Command="{Binding SelectCoverImageCommand}"
+								CommandParameter="{Binding $parent[Window]}"
+								Width="120" Height="120" Padding="0"
+								Background="#E0E0E0" CornerRadius="4" ClipToBounds="True">
+
+							<!-- Показываем картинку, пропущенную через наш конвертер байт -->
+							<Image Source="{Binding CoverImageBytes, Converter={StaticResource BytesToBitmapConverter}}"
+								   Stretch="UniformToFill"
+								   HorizontalAlignment="Center"
+								   VerticalAlignment="Center"/>
+						</Button>
+
+						<TextBlock Text="Нажмите для выбора" FontSize="10" Foreground="#9E9E9E" HorizontalAlignment="Center"/>
+					</StackPanel>
+				</Grid>
 
 				<Separator Background="#E0E0E0" Margin="0,5"/>
 
-<!-- Скрываем ввод треков, если мы в режиме редактирования метаданных альбома -->
-<StackPanel IsVisible="{Binding IsTrackEditingVisible}">
-    <Separator Background="#E0E0E0" Margin="0,5"/>
-    <Grid ColumnDefinitions="*, Auto">
-        <TextBlock Grid.Column="0" Text="Носители и треклист" FontSize="16" FontWeight="Bold" Foreground="#1976D2" VerticalAlignment="Center"/>
-        <Button Grid.Column="1" Content="+ Добавить диск" Command="{Binding AddDiscCommand}" Background="#1976D2" Foreground="White" FontSize="12"/>
-    </Grid>
-    <!-- Тут остается ваш внутренний ItemsControl для Discs -->
-</StackPanel>
+				<!-- Скрываем ввод треков, если мы в режиме редактирования метаданных альбома -->
+				<StackPanel IsVisible="{Binding IsTrackEditingVisible}">
+					<Separator Background="#E0E0E0" Margin="0,5"/>
+					<Grid ColumnDefinitions="*, Auto">
+						<TextBlock Grid.Column="0" Text="Носители и треклист" FontSize="16" FontWeight="Bold" Foreground="#1976D2" VerticalAlignment="Center"/>
+						<Button Grid.Column="1" Content="+ Добавить диск" Command="{Binding AddDiscCommand}" Background="#1976D2" Foreground="White" FontSize="12"/>
+					</Grid>
+					<!-- Тут остается ваш внутренний ItemsControl для Discs -->
+				</StackPanel>
 
 				<!-- Отображение списка дисков на форме -->
 				<ItemsControl ItemsSource="{Binding Discs}">
