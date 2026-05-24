@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using MusicCollection.Application.Albums.Commands.CreateAlbum;
@@ -10,8 +12,6 @@ using MusicCollection.Application.Artists.Commands.DeleteArtist;
 using MusicCollection.Application.Artists.Queries.GetArtistsList;
 using MusicCollection.Application.Tracks.Commands.AddTracksBatch;
 using MusicCollection.AvaloniaUI.Views;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 
 namespace MusicCollection.AvaloniaUI.ViewModels;
 
@@ -29,7 +29,6 @@ public partial class MainWindowViewModel : ViewModelBase
         IGetAlbumDetailsQuery detailsQuery,
         IDeleteAlbumCommandService deleteAlbumService,
         IDeleteArtistCommandService deleteArtistService)
-
     {
         _artistsQuery = artistsQuery;
         _carouselQuery = carouselQuery;
@@ -53,12 +52,13 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     public partial AlbumDetailsDto? CurrentAlbumDetails { get; set; }
 
-
-
     [RelayCommand(CanExecute = nameof(CanBatchLoadTracks))]
     private async Task OpenBatchLoadTracksWindowAsync()
     {
-        if (CurrentAlbumDetails == null) return;
+        if (CurrentAlbumDetails == null)
+        {
+            return;
+        }
 
         // Вручную достаем сервис импорта из общего DI-контейнера App
         var batchService = App.ServiceProvider.GetRequiredService<IAddTracksBatchCommandService>();
@@ -80,7 +80,6 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     private bool CanBatchLoadTracks() => CurrentAlbumDetails != null;
-
 
     // Команда удаления альбома
     // Атрибут CanExecute указывает, что кнопка активна ТОЛЬКО когда SelectedAlbum не равен null
@@ -118,17 +117,16 @@ public partial class MainWindowViewModel : ViewModelBase
 
         // 3. ДОБАВЛЕНИЕ: Активируем/деактивируем кнопку "Редактировать метаданные"
         OpenEditAlbumWindowCommand.NotifyCanExecuteChanged();
-
-
-        //OpenBatchLoadTracksWindowCommand.NotifyCanExecuteChanged();
-
     }
 
     // 3. ДОБАВЛЯЕМ КОМАНДУ УДАЛЕНИЯ АРТИСТА
     [RelayCommand(CanExecute = nameof(CanDeleteArtist))]
     private async Task DeleteArtistAsync()
     {
-        if (SelectedArtist == null) return;
+        if (SelectedArtist == null)
+        {
+            return;
+        }
 
         // Вызываем сервис удаления из слоя Application
         var command = new DeleteArtistCommand(SelectedArtist.Id);
@@ -137,15 +135,18 @@ public partial class MainWindowViewModel : ViewModelBase
         // Полностью обновляем левую панель и сбрасываем выбор
         Artists.Clear();
         var refreshedArtists = await _artistsQuery.ExecuteAsync();
-        foreach (var artist in refreshedArtists) Artists.Add(artist);
+        foreach (var artist in refreshedArtists)
+        {
+            Artists.Add(artist);
+        }
 
         SelectedArtist = null; // Это автоматически очистит карусель и детали треков!
     }
 
     private bool CanDeleteArtist() => SelectedArtist != null;
 
-    // 4. ОБНОВЛЯЕМ ТРИГГЕР ИЗМЕНЕНИЯ АРТИСТА
-    // Нам нужно сказать кнопке перепроверить CanExecute, когда пользователь кликает по списку
+    // ОБНОВЛЯЕМ ТРИГГЕР ИЗМЕНЕНИЯ АРТИСТА
+    // Нам нужно сказать кнопке перепроверить CanExecute, когда кликают по списку
     partial void OnSelectedArtistChanged(ArtistLookupDto? value)
     {
         _ = LoadCarouselAsync();
@@ -157,7 +158,10 @@ public partial class MainWindowViewModel : ViewModelBase
     private async Task InitializeAsync()
     {
         var artistsList = await _artistsQuery.ExecuteAsync();
-        foreach (var artist in artistsList) Artists.Add(artist);
+        foreach (var artist in artistsList)
+        {
+            Artists.Add(artist);
+        }
 
         await LoadCarouselAsync();
     }
@@ -166,7 +170,6 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task OpenAddAlbumWindowAsync()
     {
-
         var window = App.ServiceProvider.GetRequiredService<AddAlbumWindow>();
 
         if (App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
@@ -176,7 +179,7 @@ public partial class MainWindowViewModel : ViewModelBase
             // Если окно вернуло true (альбом и новый артист успешно сохранены)
             if (result)
             {
-                // 1. ПОЧИНКА: Полностью перечитываем список артистов из MS SQL Server
+                // ПОЧИНКА: Полностью перечитываем список артистов из MS SQL Server
                 Artists.Clear();
                 var refreshedArtists = await _artistsQuery.ExecuteAsync();
                 foreach (var artist in refreshedArtists)
@@ -184,19 +187,19 @@ public partial class MainWindowViewModel : ViewModelBase
                     Artists.Add(artist);
                 }
 
-                // 2. Обновляем карусель альбомов, как и раньше
+                // Обновляем карусель альбомов, как и раньше
                 await LoadCarouselAsync();
             }
         }
-
-
     }
-
 
     [RelayCommand(CanExecute = nameof(CanEditAlbum))]
     private async Task OpenEditAlbumWindowAsync()
     {
-        if (SelectedAlbum == null) return;
+        if (SelectedAlbum == null)
+        {
+            return;
+        }
 
         // Вручную собираем ViewModel с передачей ID выбранного альбома
         using var scope = App.ServiceProvider.CreateScope();
@@ -218,15 +221,14 @@ public partial class MainWindowViewModel : ViewModelBase
                 // Обновляем витрину и блок деталей
                 await LoadCarouselAsync();
                 if (SelectedAlbum != null)
+                {
                     CurrentAlbumDetails = await _detailsQuery.ExecuteAsync(SelectedAlbum.Id);
+                }
             }
         }
     }
 
     private bool CanEditAlbum() => SelectedAlbum != null;
-
-
-
 
     private async Task LoadCarouselAsync()
     {
@@ -234,7 +236,10 @@ public partial class MainWindowViewModel : ViewModelBase
         CurrentAlbumDetails = null;
 
         var albums = await _carouselQuery.ExecuteAsync(artistId: SelectedArtist?.Id);
-        foreach (var album in albums) CarouselAlbums.Add(album);
+        foreach (var album in albums)
+        {
+            CarouselAlbums.Add(album);
+        }
     }
 
     private async Task LoadAlbumDetailsAsync()

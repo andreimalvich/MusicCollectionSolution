@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace MusicCollection.Infrastructure.Persistence.Migrations
 {
-    /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -17,7 +15,7 @@ namespace MusicCollection.Infrastructure.Persistence.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                 },
                 constraints: table =>
                 {
@@ -35,7 +33,7 @@ namespace MusicCollection.Infrastructure.Persistence.Migrations
                     CatalogNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Label = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
                     Packaging = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "JewelCase"),
-                    ArtistId = table.Column<int>(type: "int", nullable: false)
+                    ArtistId = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -55,7 +53,7 @@ namespace MusicCollection.Infrastructure.Persistence.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Data = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
-                    AlbumId = table.Column<int>(type: "int", nullable: false)
+                    AlbumId = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -76,7 +74,7 @@ namespace MusicCollection.Infrastructure.Persistence.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     DiscNumber = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
                     DiscName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    AlbumId = table.Column<int>(type: "int", nullable: false)
+                    AlbumId = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -98,7 +96,7 @@ namespace MusicCollection.Infrastructure.Persistence.Migrations
                     Number = table.Column<int>(type: "int", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
                     Duration = table.Column<TimeSpan>(type: "time(0)", nullable: false),
-                    PhysicalDiscId = table.Column<int>(type: "int", nullable: false)
+                    PhysicalDiscId = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -133,7 +131,6 @@ namespace MusicCollection.Infrastructure.Persistence.Migrations
                 column: "PhysicalDiscId");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

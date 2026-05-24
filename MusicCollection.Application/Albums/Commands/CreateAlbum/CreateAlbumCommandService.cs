@@ -18,13 +18,13 @@ public class CreateAlbumCommandService(IApplicationDbContext context) : ICreateA
             ArtistId = command.ArtistId,
         };
 
-        // Если пользователь прикрепил обложку — создаем сущность изображения
+        // Если прикрепил обложку — создаем сущность изображения
         if (command.CoverImage is { Length: > 0 })
         {
             album.Image = new AlbumImage { Data = command.CoverImage };
         }
 
-        // Наполняем альбом дисками и треками из C# 12 коллекций
+        // Наполняем альбом дисками и треками из коллекций
         foreach (var discDto in command.Discs)
         {
             var disc = new PhysicalDisc

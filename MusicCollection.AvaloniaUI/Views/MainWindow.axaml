@@ -21,8 +21,6 @@
 	</Window.Resources>
 
 	<Design.DataContext>
-		<!-- This only sets the DataContext for the previewer in an IDE,
-		to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
 		<vm:MainWindowViewModel/>
 	</Design.DataContext>
 
@@ -33,7 +31,7 @@
 		<!-- ЛЕВАЯ ПАНЕЛЬ: Список артистов и кнопка удаления            -->
 		<!-- ========================================================== -->
 		<Border Grid.Column="0" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0">
-			<!-- Меняем RowDefinitions, добавляя третью строчку Auto под кнопку -->
+			
 			<Grid RowDefinitions="Auto, *, Auto">
 
 				<Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="15,15,15,5">
@@ -45,8 +43,6 @@
 							Background="#1976D2" Foreground="White"
 							FontWeight="Bold" CornerRadius="4" Padding="10,4"/>
 				</Grid>
-
-
 
 				<!-- Список артистов (занимает центральную часть) -->
 				<ListBox Grid.Row="1"
@@ -60,7 +56,7 @@
 					</ListBox.ItemTemplate>
 				</ListBox>
 
-				<!-- КНОПКА УДАЛЕНИЯ АРТИСТА (Прижимается к самому низу панели) -->
+				<!-- КНОПКА УДАЛЕНИЯ АРТИСТА -->
 				<Button Grid.Row="2"
 						Content="Удалить исполнителя"
 						Command="{Binding DeleteArtistCommand}"
@@ -139,14 +135,13 @@
 					<TextBlock Text="{Binding CatalogNumber, StringFormat='Каталог #: {0}'}" FontSize="13" IsVisible="{Binding CatalogNumber, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
 					<TextBlock Text="{Binding Packaging, StringFormat='Упаковка: {0}'}" FontSize="13"/>
 
-					<Button Content="Пакетная загрузка треков" 
-        Command="{Binding $parent[Window].DataContext.OpenBatchLoadTracksWindowCommand}"
-        Background="#2E7D32" Foreground="White"
-        FontWeight="Medium" FontSize="12"
-        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-        Padding="10,6" Margin="0,10,0,0" CornerRadius="4">
-</Button>
-
+					<Button Content="Пакетная загрузка треков"
+							Command="{Binding $parent[Window].DataContext.OpenBatchLoadTracksWindowCommand}"
+							Background="#2E7D32" Foreground="White"
+							FontWeight="Medium" FontSize="12"
+							HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+							Padding="10,6" Margin="0,10,0,0" CornerRadius="4">
+					</Button>
 
 					<!-- ========================================================== -->
 					<!-- ИСПРАВЛЕНИЕ / ДОБАВЛЕНИЕ: Кнопка удаления альбома         -->

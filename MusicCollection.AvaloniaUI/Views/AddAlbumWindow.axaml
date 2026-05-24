@@ -3,7 +3,7 @@
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-		xmlns:vm="using:MusicCollection.AvaloniaUI.ViewModels"
+		xmlns:vm="using:MusicCollection.AvaloniaUI.ViewModels"		
 		xmlns:artists="using:MusicCollection.Application.Artists.Queries.GetArtistsList"
 		xmlns:converters="using:MusicCollection.AvaloniaUI.Converters"
 		x:Class="MusicCollection.AvaloniaUI.Views.AddAlbumWindow"
@@ -35,14 +35,14 @@
 								  Text="{Binding ArtistSearchText, Mode=TwoWay}"
 								  IsEditable="True"
 								  IsTextSearchEnabled="True"
-								  DisplayMemberBinding="{Binding Name, DataType=artists:ArtistLookupDto}"								  
-							      HorizontalAlignment="Stretch">							
-						</ComboBox>
+								  DisplayMemberBinding="{Binding Name, DataType=artists:ArtistLookupDto}"
+								  HorizontalAlignment="Stretch">
+					</ComboBox>
 					</StackPanel>
 
 					<StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,10,10">
 						<TextBlock Text="Название альбома *" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
-						<TextBox Text="{Binding Title, Mode=TwoWay}" Watermark="Введите название..."/>
+						<TextBox Text="{Binding Title, Mode=TwoWay}" PlaceholderText="Введите название..."/>
 					</StackPanel>
 
 					<!-- 2-й ряд (Год и Упаковка) -->
@@ -59,16 +59,16 @@
 					<!-- 3-й ряд (Лейбл и Каталог) -->
 					<StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,10,10">
 						<TextBlock Text="Рекорд-лейбл" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
-						<TextBox Text="{Binding Label, Mode=TwoWay}" Watermark="Например: Sony Music"/>
+						<TextBox Text="{Binding Label, Mode=TwoWay}" PlaceholderText="Например: Sony Music"/>
 					</StackPanel>
 
 					<StackPanel Grid.Row="2" Grid.Column="1" Margin="10,0,10,10">
 						<TextBlock Text="Каталожный номер" FontSize="12" Margin="0,0,0,4" Foreground="#757575"/>
-						<TextBox Text="{Binding CatalogNumber, Mode=TwoWay}" Watermark="Например: CD-74321"/>
+						<TextBox Text="{Binding CatalogNumber, Mode=TwoWay}" PlaceholderText="Например: CD-74321"/>
 					</StackPanel>
 
-					<!-- ПРАВАЯ КОЛОНКА (Занимает все 3 ряда по вертикали!) -->
-					<!-- Сюда мы помещаем блок обложки -->
+					<!-- ПРАВАЯ КОЛОНКА -->
+					<!-- Блок обложки ЗДЕСЬ -->
 					<StackPanel Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="10,15,0,0" Spacing="8">
 						<TextBlock Text="Обложка диска" FontSize="12" Foreground="#757575" HorizontalAlignment="Center"/>
 
@@ -78,7 +78,7 @@
 								Width="120" Height="120" Padding="0"
 								Background="#E0E0E0" CornerRadius="4" ClipToBounds="True">
 
-							<!-- Показываем картинку, пропущенную через наш конвертер байт -->
+							<!-- Показываем картинку, пропущенную через конвертер -->
 							<Image Source="{Binding CoverImageBytes, Converter={StaticResource BytesToBitmapConverter}}"
 								   Stretch="UniformToFill"
 								   HorizontalAlignment="Center"
@@ -98,7 +98,7 @@
 						<TextBlock Grid.Column="0" Text="Носители и треклист" FontSize="16" FontWeight="Bold" Foreground="#1976D2" VerticalAlignment="Center"/>
 						<Button Grid.Column="1" Content="+ Добавить диск" Command="{Binding AddDiscCommand}" Background="#1976D2" Foreground="White" FontSize="12"/>
 					</Grid>
-					<!-- Тут остается ваш внутренний ItemsControl для Discs -->
+					<!-- Тут остается внутренний ItemsControl для Discs -->
 				</StackPanel>
 
 				<!-- Отображение списка дисков на форме -->
@@ -110,7 +110,7 @@
 									<!-- Шапка диска -->
 									<Grid ColumnDefinitions="Auto, *, Auto">
 										<TextBlock Grid.Column="0" Text="{Binding DiscNumber, StringFormat='💿 Носитель {0}'}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0"/>
-										<TextBox Grid.Column="1" Text="{Binding DiscName, Mode=TwoWay}" Watermark="Подзаголовок диска (необязательно)..." FontSize="12"/>
+										<TextBox Grid.Column="1" Text="{Binding DiscName, Mode=TwoWay}" PlaceholderText="Подзаголовок диска (необязательно)..." FontSize="12"/>
 										<Button Grid.Column="2" Content="Удалить диск" Command="{Binding $parent[ItemsControl].DataContext.RemoveDiscCommand}" CommandParameter="{Binding}" Background="#EF5350" Foreground="White" FontSize="11" Margin="10,0,0,0"/>
 									</Grid>
 
@@ -122,9 +122,9 @@
 													<!-- Номер -->
 													<TextBlock Grid.Column="0" Text="{Binding Number, StringFormat='{}{0:D2}.'}" VerticalAlignment="Center" Foreground="#9E9E9E"/>
 													<!-- Название трека -->
-													<TextBox Grid.Column="1" Text="{Binding Title, Mode=TwoWay}" Watermark="Название песни..." FontSize="12" Margin="0,0,10,0"/>
+													<TextBox Grid.Column="1" Text="{Binding Title, Mode=TwoWay}" PlaceholderText="Название песни..." FontSize="12" Margin="0,0,10,0"/>
 													<!-- Длительность -->
-													<TextBox Grid.Column="2" Text="{Binding DurationStr, Mode=TwoWay}" Watermark="03:45" FontSize="12" HorizontalContentAlignment="Center" Margin="0,0,10,0"/>
+													<TextBox Grid.Column="2" Text="{Binding DurationStr, Mode=TwoWay}" PlaceholderText="03:45" FontSize="12" HorizontalContentAlignment="Center" Margin="0,0,10,0"/>
 													<!-- Кнопка удаления трека -->
 													<Button Grid.Column="3" Content="✕" Command="{Binding $parent[Border].DataContext.RemoveTrackCommand}" CommandParameter="{Binding}" Background="Transparent" Foreground="#EF5350" Padding="8,4"/>
 												</Grid>

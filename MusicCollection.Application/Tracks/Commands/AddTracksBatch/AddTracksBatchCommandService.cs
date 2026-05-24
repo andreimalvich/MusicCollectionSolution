@@ -8,14 +8,14 @@ public class AddTracksBatchCommandService(IApplicationDbContext context) : IAddT
 {
     public async Task ExecuteAsync(AddTracksBatchCommand command, CancellationToken ct = default)
     {
-        // 1. Проверяем, существует ли вообще этот диск в БД
+        // Проверяем, существует ли вообще этот диск в БД
         var discExists = await context.Discs.AnyAsync(d => d.Id == command.PhysicalDiscId, ct);
         if (!discExists)
         {
             throw new KeyNotFoundException("Физический диск не найден в базе данных.");
         }
 
-        // 2. Создаем коллекцию доменных сущностей с помощью выражений C# 12
+        // Создаем коллекцию доменных сущностей
         var newTracks = command.Tracks.Select(t => new Track
         {
             PhysicalDiscId = command.PhysicalDiscId,
@@ -24,10 +24,10 @@ public class AddTracksBatchCommandService(IApplicationDbContext context) : IAddT
             Duration = t.Duration,
         }).ToList();
 
-        // 3. Используем встроенную оптимизацию EF Core для массовой вставки
+        // Используем встроенную оптимизацию EF Core для массовой вставки
         await context.Tracks.AddRangeAsync(newTracks, ct);
 
-        // 4. Сохраняем всё одним транзакционным SQL-пакетом
+        // Сохраняем всё одним транзакционным SQL-пакетом
         await context.SaveChangesAsync(ct);
     }
 }

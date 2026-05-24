@@ -9,7 +9,7 @@ public class DeleteAlbumCommandService(IApplicationDbContext context) : IDeleteA
         var album = await context.Albums.FindAsync([command.Id], ct)
             ?? throw new KeyNotFoundException($"Альбом с ID {command.Id} не найден.");
 
-        // Удаление по цепочке -> AlbumImages->Discs->Tracks.
+        // Удаление по цепочке AlbumImages->Discs->Tracks.
         context.Albums.Remove(album);
 
         await context.SaveChangesAsync(ct);

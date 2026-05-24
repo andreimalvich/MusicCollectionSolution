@@ -11,7 +11,8 @@ public partial class BatchLoadTracksWindow : Window
         InitializeComponent();
     }
 
-    public BatchLoadTracksWindow(BatchLoadTracksWindowViewModel viewModel) : this()
+    public BatchLoadTracksWindow(BatchLoadTracksWindowViewModel viewModel)
+        : this()
     {
         DataContext = viewModel;
         viewModel.RequestClose += () => Close(true);

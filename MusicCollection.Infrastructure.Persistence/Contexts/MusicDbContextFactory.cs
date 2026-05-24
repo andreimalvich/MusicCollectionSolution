@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace MusicCollection.Infrastructure.Persistence.Contexts;
 
-// ТОЛЬКО ДЛЯ КОНСОЛЬНЫХ КОМАНД СОЗДАНИЯ МИГРАЦИЙ
 internal class MusicDbContextFactory : IDesignTimeDbContextFactory<MusicDbContext>
 {
     public MusicDbContext CreateDbContext(string[] args)

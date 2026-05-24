@@ -6,7 +6,6 @@ public class UpdateAlbumCommandValidator : AbstractValidator<UpdateAlbumCommand>
 {
     public UpdateAlbumCommandValidator()
     {
-        // Теперь RuleFor находится внутри конструктора, и ошибка исчезнет
         RuleFor(x => x.Id)
             .GreaterThan(0).WithMessage("Некорректный идентификатор альбома.");
 
@@ -16,7 +15,7 @@ public class UpdateAlbumCommandValidator : AbstractValidator<UpdateAlbumCommand>
 
         RuleFor(x => x.ReleaseYear)
             .NotEmpty().WithMessage("Год выпуска должен быть указан.")
-            .GreaterThanOrEqualTo(1982).WithMessage("Год выпуска не может быть раньше 1982 (год изобретения CD).")
+            .GreaterThanOrEqualTo(1982).WithMessage("Год выпуска не может быть раньше 1982.")
             .LessThanOrEqualTo(DateTime.UtcNow.Year + 1).WithMessage("Год выпуска не может быть из далекого будущего.");
 
         RuleFor(x => x.CatalogNumber)

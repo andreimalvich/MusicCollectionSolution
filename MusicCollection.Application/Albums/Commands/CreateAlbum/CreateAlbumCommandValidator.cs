@@ -13,7 +13,7 @@ public class CreateAlbumCommandValidator : AbstractValidator<CreateAlbumCommand>
 
         RuleFor(x => x.ReleaseYear)
             .NotEmpty().WithMessage("Год выпуска должен быть указан.")
-            .GreaterThanOrEqualTo(1982).WithMessage("Год выпуска не может быть раньше 1982 (год изобретения CD).")
+            .GreaterThanOrEqualTo(1982).WithMessage("Год выпуска не может быть раньше 1982.")
             .LessThanOrEqualTo(DateTime.UtcNow.Year + 1).WithMessage("Год выпуска не может быть из далекого будущего.");
 
         RuleFor(x => x.ArtistId)

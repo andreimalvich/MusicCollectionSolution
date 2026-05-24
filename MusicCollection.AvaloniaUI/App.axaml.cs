@@ -1,5 +1,4 @@
 ﻿using System;
-using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,7 +25,7 @@ public partial class App : Avalonia.Application
         const string connectionString =
             @"Server=(localdb)\mssqllocaldb;Database=MusicCDDB;Trusted_Connection=True;";
 
-        // Подключаем наши слои данных, логики и окна
+        // Подключаем слои данных, логики и окна
         services.AddPersistenceServices(connectionString);
         services.AddApplicationServices();
 

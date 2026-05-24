@@ -1,4 +1,9 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -9,11 +14,6 @@ using MusicCollection.Application.Albums.Queries.GetAlbumDetails;
 using MusicCollection.Application.Artists.Queries.GetArtistsList;
 using MusicCollection.Application.Common.Interfaces;
 using MusicCollection.Domain.Entities;
-using System;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MusicCollection.AvaloniaUI.ViewModels;
 
@@ -23,27 +23,21 @@ public partial class AddAlbumWindowViewModel : ViewModelBase
     private readonly ICreateAlbumCommandService _createAlbumService;
     private readonly IUpdateAlbumCommandService _updateService;
     private readonly IGetAlbumDetailsQuery _detailsQuery;
-    
 
     // Храним ID редактируемого альбома (0, если это создание)
     private readonly int _editingAlbumId;
 
-    [ObservableProperty]
-    public partial string? ArtistSearchText { get; set; }
-
-
-
     public AddAlbumWindowViewModel(
         IGetArtistsListQuery artistsQuery,
         ICreateAlbumCommandService createAlbumService,
-        IUpdateAlbumCommandService updateService, // Имя параметра
+        IUpdateAlbumCommandService updateService,
         IGetAlbumDetailsQuery detailsQuery,
         int albumId = 0)
     {
         // Привязываем переданные из DI сервисы к полям нашего класса
         _artistsQuery = artistsQuery;
         _createAlbumService = createAlbumService;
-        _updateService = updateService; // Вот здесь мы сохраняем его в поле _updateService!
+        _updateService = updateService;
         _detailsQuery = detailsQuery;
         _editingAlbumId = albumId;
 
@@ -55,13 +49,58 @@ public partial class AddAlbumWindowViewModel : ViewModelBase
         }
     }
 
+    // Событие для закрытия окна из кода после успешного сохранения
+    public event Action? RequestClose;
+
+    // Списки для выпадающих меню (Исполнители и Форматы упаковки)
+    public ObservableCollection<ArtistLookupDto> Artists { get; } = [];
+
+    public Format[] Formats { get; } = Enum.GetValues<Format>();
+
+    // Реактивные поля формы (Partial Properties C# 12)
+    [ObservableProperty]
+    public partial string Title { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial int ReleaseYear { get; set; } = DateTime.Today.Year;
+
+    [ObservableProperty]
+    public partial string? CatalogNumber { get; set; }
+
+    [ObservableProperty]
+    public partial string? Label { get; set; }
+
+    [ObservableProperty]
+    public partial Format SelectedFormat { get; set; } = Format.JewelCase;
+
+    [ObservableProperty]
+    public partial ArtistLookupDto? SelectedArtist { get; set; }
+
+    [ObservableProperty]
+    public partial byte[]? CoverImageBytes { get; set; }
+
+    // Динамическая коллекция дисков для формы
+    public ObservableCollection<UiDiscModel> Discs { get; } = [];
+
+    // Динамический заголовок окна в зависимости от режима
+    public string WindowTitle => _editingAlbumId > 0 ? "Редактирование альбома" : "Добавление нового альбома в коллекцию";
+
+    // Свойство для сокрытия секции треков при обычном редактировании метаданных
+    public bool IsTrackEditingVisible => _editingAlbumId == 0;
+
+    [ObservableProperty]
+    public partial string? ArtistSearchText { get; set; }
+
     private async Task InitializeAsync()
     {
-        // 1. Загружаем список артистов для ComboBox
+        // Загружаем список артистов для ComboBox
         var list = await _artistsQuery.ExecuteAsync();
-        foreach (var artist in list) Artists.Add(artist);
+        foreach (var artist in list)
+        {
+            Artists.Add(artist);
+        }
 
-        // 2. Если это РЕДАКТИРОВАНИЕ — подгружаем данные альбома из БД
+        // Если это РЕДАКТИРОВАНИЕ — подгружаем данные альбома из БД
         if (_editingAlbumId > 0)
         {
             var albumDetails = await _detailsQuery.ExecuteAsync(_editingAlbumId);
@@ -75,7 +114,9 @@ public partial class AddAlbumWindowViewModel : ViewModelBase
 
                 // Парсим формат упаковки из строки обратно в Enum
                 if (Enum.TryParse<Format>(albumDetails.Packaging, out var format))
+                {
                     SelectedFormat = format;
+                }
 
                 // Находим текущего артиста в списке по имени
                 SelectedArtist = Artists.FirstOrDefault(a => a.Name == albumDetails.ArtistName);
@@ -95,7 +136,10 @@ public partial class AddAlbumWindowViewModel : ViewModelBase
         // Проверяем: либо выбран артист из списка, либо вбит текст руками
         string? artistName = SelectedArtist?.Name ?? ArtistSearchText;
 
-        if (string.IsNullOrWhiteSpace(Title) || string.IsNullOrWhiteSpace(artistName)) return;
+        if (string.IsNullOrWhiteSpace(Title) || string.IsNullOrWhiteSpace(artistName))
+        {
+            return;
+        }
 
         try
         {
@@ -157,75 +201,31 @@ public partial class AddAlbumWindowViewModel : ViewModelBase
         }
     }
 
-
-
-
-
-
-
-
-    // Событие для закрытия окна из кода после успешного сохранения
-    public event Action? RequestClose;
-
-    // Списки для выпадающих меню (Исполнители и Форматы упаковки)
-    public ObservableCollection<ArtistLookupDto> Artists { get; } = [];
-
-    public Format[] Formats { get; } = Enum.GetValues<Format>();
-
-    // Реактивные поля формы (Partial Properties C# 12)
-    [ObservableProperty]
-    public partial string Title { get; set; } = string.Empty;
-
-    [ObservableProperty]
-    public partial int ReleaseYear { get; set; } = DateTime.Today.Year;
-
-    [ObservableProperty]
-    public partial string? CatalogNumber { get; set; }
-
-    [ObservableProperty]
-    public partial string? Label { get; set; }
-
-    [ObservableProperty]
-    public partial Format SelectedFormat { get; set; } = Format.JewelCase;
-
-    [ObservableProperty]
-    public partial ArtistLookupDto? SelectedArtist { get; set; }
-
-    [ObservableProperty]
-    public partial byte[]? CoverImageBytes { get; set; }
-
-    // Динамическая коллекция дисков для формы
-    public ObservableCollection<UiDiscModel> Discs { get; } = [];
-
-
-    // Динамический заголовок окна в зависимости от режима
-    public string WindowTitle => _editingAlbumId > 0 ? "Редактирование альбома" : "Добавление нового альбома в коллекцию";
-
-
-    // Свойство для сокрытия секции треков при обычном редактировании метаданных
-    public bool IsTrackEditingVisible => _editingAlbumId == 0;
-
-
-
     private async Task LoadArtistsAsync()
     {
         var list = await _artistsQuery.ExecuteAsync();
-        foreach (var artist in list) Artists.Add(artist);
+        foreach (var artist in list)
+        {
+            Artists.Add(artist);
+        }
+
         SelectedArtist = Artists.FirstOrDefault();
     }
-
 
     [RelayCommand]
     private async Task SelectCoverImageAsync(TopLevel? topLevel)
     {
-        if (topLevel == null) return;
+        if (topLevel == null)
+        {
+            return;
+        }
 
         // Открываем диалоговое окно выбора файла по стандартам Avalonia
         var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Выберите обложку альбома",
             AllowMultiple = false, // Только один файл
-            FileTypeFilter = [FilePickerFileTypes.ImageAll] // Фильтр: только картинки (jpeg, png, bmp...)
+            FileTypeFilter = [FilePickerFileTypes.ImageAll], // Фильтр: только картинки (jpeg, png, bmp...)
         });
 
         // Если пользователь выбрал файл
@@ -242,8 +242,6 @@ public partial class AddAlbumWindowViewModel : ViewModelBase
             CoverImageBytes = memoryStream.ToArray();
         }
     }
-
-
 
     [RelayCommand]
     private void AddDisc()
@@ -262,91 +260,4 @@ public partial class AddAlbumWindowViewModel : ViewModelBase
             Discs.Remove(disc);
         }
     }
-
-    //[RelayCommand]
-    //private async Task SaveAsync()
-    //{
-    //    if (SelectedArtist == null || string.IsNullOrWhiteSpace(Title))
-    //    {
-    //        return;
-    //    }
-
-    //    try
-    //    {
-    //        // Мапим наши UI-данные в строгую архитектурную команду Application слоя
-    //        var command = new CreateAlbumCommand(
-    //            Title: Title,
-    //            ReleaseYear: ReleaseYear,
-    //            CatalogNumber: CatalogNumber,
-    //            Label: Label,
-    //            Packaging: SelectedFormat,
-    //            ArtistId: SelectedArtist.Id,
-    //            CoverImage: CoverImageBytes,
-    //            Discs: Discs.Select(d => new CreateDiscDto(
-    //                d.DiscNumber,
-    //                d.DiscName,
-    //                d.Tracks.Select(t => new CreateTrackDto(
-    //                    t.Number,
-    //                    t.Title,
-    //                    TimeSpan.TryParse($"00:{t.DurationStr}", out var ts) ? ts : TimeSpan.Zero
-    //                )).ToList()
-    //            )).ToList()
-    //        );
-
-    //        await _createAlbumService.ExecuteAsync(command);
-
-    //        // Если сохранение прошло без ошибок — закрываем окно
-    //        RequestClose?.Invoke();
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        // Сюда в будущем можно выводить ошибки FluentValidation над полями
-    //        System.Diagnostics.Debug.WriteLine($"Ошибка валидации: {ex.Message}");
-    //    }
-    //}
-}
-
-// Вспомогательные легковесные UI-модели для динамических списков формы ввода
-public partial class UiDiscModel : ObservableObject
-{
-    [ObservableProperty]
-    public partial int DiscNumber { get; set; }
-
-    [ObservableProperty]
-    public partial string? DiscName { get; set; }
-
-    public ObservableCollection<UiTrackModel> Tracks { get; } = [];
-
-    [RelayCommand]
-    public void AddTrack()
-    {
-        Tracks.Add(new UiTrackModel { Number = Tracks.Count + 1 });
-    }
-
-    [RelayCommand]
-    public void RemoveTrack(UiTrackModel track)
-    {
-        if (Tracks.Count > 1)
-        {
-            Tracks.Remove(track);
-        }
-    }
-
-
-
-
-
-
-}
-
-public partial class UiTrackModel : ObservableObject
-{
-    [ObservableProperty]
-    public partial int Number { get; set; }
-
-    [ObservableProperty]
-    public partial string Title { get; set; } = string.Empty;
-
-    [ObservableProperty]
-    public partial string DurationStr { get; set; } = "03:30"; // Дефолт маска ввода
 }

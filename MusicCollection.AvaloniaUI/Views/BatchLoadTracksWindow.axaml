@@ -36,7 +36,7 @@
         <!-- Большое текстовое поле ввода -->
         <TextBox Grid.Row="2" 
                  Text="{Binding RawTrackListText, Mode=TwoWay}" 
-                 Watermark="Вставьте текст треклиста сюда..." 
+                 PlaceholderText="Вставьте текст треклиста сюда..." 
                  AcceptsReturn="True" 
                  FontFamily="Courier New" FontSize="13"
                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>

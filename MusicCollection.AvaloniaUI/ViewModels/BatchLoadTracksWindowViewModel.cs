@@ -1,5 +1,4 @@
-﻿// MusicCollection.AvaloniaUI/ViewModels/BatchLoadTracksWindowViewModel.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -16,16 +15,6 @@ public partial class BatchLoadTracksWindowViewModel : ViewModelBase
     private readonly IAddTracksBatchCommandService _addTracksBatchService;
     private readonly AlbumDetailsDto _albumDetails;
 
-    // Список дисков альбома для выпадающего списка (ComboBox)
-    public ObservableCollection<DiscDetailsDto> Discs { get; } = [];
-
-    [ObservableProperty] public partial DiscDetailsDto? SelectedDisc { get; set; }
-    [ObservableProperty] public partial string RawTrackListText { get; set; } = string.Empty;
-
-    public string AlbumTitle => _albumDetails.Title;
-
-    public event Action? RequestClose;
-
     public BatchLoadTracksWindowViewModel(
         IAddTracksBatchCommandService addTracksBatchService,
         AlbumDetailsDto albumDetails)
@@ -38,13 +27,30 @@ public partial class BatchLoadTracksWindowViewModel : ViewModelBase
         {
             Discs.Add(disc);
         }
+
         SelectedDisc = Discs.FirstOrDefault();
     }
+
+    public event Action? RequestClose;
+
+    // Список дисков альбома для выпадающего списка (ComboBox)
+    public ObservableCollection<DiscDetailsDto> Discs { get; } = [];
+
+    [ObservableProperty]
+    public partial DiscDetailsDto? SelectedDisc { get; set; }
+
+    [ObservableProperty]
+    public partial string RawTrackListText { get; set; } = string.Empty;
+
+    public string AlbumTitle => _albumDetails.Title;
 
     [RelayCommand]
     private async Task ImportAsync()
     {
-        if (SelectedDisc == null || string.IsNullOrWhiteSpace(RawTrackListText)) return;
+        if (SelectedDisc == null || string.IsNullOrWhiteSpace(RawTrackListText))
+        {
+            return;
+        }
 
         // Разрезаем большой текст из TextBox на отдельные строки
         var lines = RawTrackListText.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
@@ -53,13 +59,19 @@ public partial class BatchLoadTracksWindowViewModel : ViewModelBase
 
         foreach (var line in lines)
         {
-            if (string.IsNullOrWhiteSpace(line)) continue;
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
 
             try
             {
                 // Ожидаем формат строки: "Название песни - 04:52" или "01. Название - 04:52"
                 var parts = line.Split('-');
-                if (parts.Length != 2) continue;
+                if (parts.Length != 2)
+                {
+                    continue;
+                }
 
                 var leftPart = parts[0].Trim();
                 var rightPart = parts[1].Trim(); // Время, например "04:52"
@@ -86,7 +98,7 @@ public partial class BatchLoadTracksWindowViewModel : ViewModelBase
 
         if (importItems.Count > 0)
         {
-            // Отправляем всю пачку треков в наш готовый сервис на слое Application
+            // Отправляем пачку треков в сервис
             var command = new AddTracksBatchCommand(SelectedDisc.Id, importItems);
             await _addTracksBatchService.ExecuteAsync(command);
 

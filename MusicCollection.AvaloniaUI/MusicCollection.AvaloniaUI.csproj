@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
 
@@ -29,5 +28,9 @@
     <ProjectReference Include="..\MusicCollection.Application\MusicCollection.Application.csproj" />
     <ProjectReference Include="..\MusicCollection.Domain\MusicCollection.Domain.csproj" />
     <ProjectReference Include="..\MusicCollection.Infrastructure.Persistence\MusicCollection.Infrastructure.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
   </ItemGroup>
 </Project>
